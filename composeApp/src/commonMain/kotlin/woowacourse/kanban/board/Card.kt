@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -17,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,109 +28,123 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import woowacourse.kanban.board.Theme.Gray100
+import woowacourse.kanban.board.Theme.Gray200
+import woowacourse.kanban.board.Theme.Gray500
+import woowacourse.kanban.board.Theme.Gray600
+import woowacourse.kanban.board.Theme.Gray700
+import woowacourse.kanban.board.Theme.Gray900
 
 
 @Composable
 fun Card(title: String = "제목없음", content: String = "", chips: List<String> = emptyList(), user: String = "알수없음") {
     Column(
         modifier = Modifier
+            .width(286.dp)
             .clip(shape = RoundedCornerShape(10.dp))
-            .background(Color.White)
-            .border(width = 1.dp, shape = RoundedCornerShape(10.dp), color = Color(0xffe5e7eb))
-            .padding(17.dp, 17.dp, 17.dp, 1.dp)
-            .width(286.dp),
+            .border(width = 1.dp, shape = RoundedCornerShape(10.dp), color = Gray200)
+            .padding(17.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Title(title)
         if (content.isNotBlank()) Content(content)
         if (chips.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                chips.take(5).forEach { chip ->
-                    Chip(chip)
-                }
-            }
+            Chips(chips)
         }
         User(name = user)
     }
 }
 
 @Composable
-fun Title(title: String) {
+fun Title(title: String?) {
+    val displayTitle = title?.takeIf { it.isNotBlank() } ?: "제목 없음"
     Text(
-        text = title,
+        text = displayTitle,
         fontSize = 16.sp,
-        fontWeight = FontWeight.W500,
-        color = Color(0xff101828),
+        fontWeight = FontWeight.Medium,
+        color = Gray900,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Composable
-fun Content(content: String) {
+fun Content(content: String?) {
+    val displayContent = content?.takeIf { it.isNotBlank() } ?: ""
     Text(
-        text = content,
+        text = displayContent,
         fontSize = 14.sp,
-        fontWeight = FontWeight.W400,
-        color = Color(0xff4a5565),
+        fontWeight = FontWeight.Normal,
+        color = Gray600,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Composable
-fun Chip(content: String) {
+fun Chip(text: String) {
     Text(
-        text = content.take(5),
+        text = text.take(5),
         fontSize = 12.sp,
-        fontWeight = FontWeight.W400,
-        color = Color(0xff364153),
-        modifier = Modifier.clip(shape = RoundedCornerShape(100.dp)).background(Color(0xffF3F4F6))
+        fontWeight = FontWeight.Normal,
+        color = Gray700,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(color = Gray100)
             .padding(horizontal = 8.dp, vertical = 4.dp),
-
-        )
+    )
 }
 
 @Composable
-fun User(name: String) {
-    Box {
-        Box(
-            modifier = Modifier.background(Color(0xfff3f4f6)).fillMaxWidth().height(1.dp).align(Alignment.TopCenter),
-        )
+fun Chips(chips: List<String>) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        chips.take(5).forEach { Chip(it) }
+    }
+}
 
-        Row(
-            modifier = Modifier.padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+
+@Composable
+fun User(name: String) {
+
+    HorizontalDivider(color = Gray200, thickness = 1.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(color = Color.White)
+                .border(width = 2.dp, color = Gray500, shape = CircleShape),
         ) {
-            Box(
-                modifier = Modifier.size(24.dp).clip(CircleShape).background(color = Color.White)
-                    .border(width = 2.dp, color = Color(0xff838383), shape = CircleShape),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBox,
-                    contentDescription = "profile image",
-                    tint = Color(0xff838383),
-                    modifier = Modifier.clip(CircleShape).requiredSize(size = 33.dp),
-                )
-            }
-            Text(
-                text = name,
-                fontWeight = FontWeight.W500,
-                fontSize = 14.sp,
-                color = Color(0xff364153),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            Icon(
+                imageVector = Icons.Default.AccountBox,
+                contentDescription = "profile image",
+                tint = Gray500,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .requiredSize(size = 33.dp),
             )
         }
+        Text(
+            text = name,
+            fontWeight = FontWeight.Medium,
+            fontSize = 14.sp,
+            color = Gray700,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
 @Composable
-@Preview
+@Preview(
+    heightDp = 1000,
+)
 fun CardPreview() {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -158,7 +171,7 @@ fun CardPreview() {
         )
 
         Card(
-            title = "LazyColumn 컴포넌트 구현",
+            title = "너무너무 긴 제목은 한 줄까지만 노출하고 말줄임표로 처리합니다.",
             content = "너무너무너무 긴 설명은 두 줄까지만 노출하고 말줄임표로 처리합니다 두 줄까지만 노출하고 말줄임표로 처리합니다",
             chips = listOf("너무너무", "긴 태그", "최대로", "5자까지", "5개제한임"),
             user = "너무너무너무 긴 담당자도 한 줄 너무너무너무 긴 담당자도 한 줄",
