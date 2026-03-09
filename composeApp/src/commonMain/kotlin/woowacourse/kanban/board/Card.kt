@@ -37,12 +37,19 @@ import woowacourse.kanban.board.Theme.Gray900
 
 
 private const val DEFAULT_TITLE = "제목없음"
-private const val DEFAULT_USERNAME = "사용자이름없음"
+private const val DEFAULT_ASSIGNEE = "담당자없음"
 
 val MAX_TITLE_LENGTH = 20 // 말줄임표로 표시되는 기준을 글자수 20자로 정의하겠습니다.
-val MAX_USERNAME_LENGTH = 17 // 말줄임표로 표시되는 기준을 글자수 17자로 정의하겠습니다.
+val MAX_ASSIGNEE_LENGTH = 17 // 말줄임표로 표시되는 기준을 글자수 17자로 정의하겠습니다.
+
 @Composable
-fun Card(title: String = "제목없음", content: String = "", chips: List<String> = emptyList(), username: String = "알수없음") {
+fun Card(title: String = "제목없음", description: String = "", chips: List<String> = emptyList(), assignee: String = "담당자없음") {
+    // 유효성 검사
+    val resolvedTitle = resolveCardTitle(title)
+    val resolvedDescription = resolveCardDescription(description)
+    val resolvedChips = resolveVisibleChips(chips)
+    val resolvedAssignee = resolveCardAssignee(assignee)
+
     Column(
         modifier = Modifier
             .width(286.dp)
@@ -51,15 +58,16 @@ fun Card(title: String = "제목없음", content: String = "", chips: List<Strin
             .padding(17.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Title(title)
-        if (content.isNotBlank()) Content(content)
-        if (chips.isNotEmpty()) {
-            Chips(chips)
+        Title(resolvedTitle)
+        if (resolvedDescription != null) Description(resolvedDescription)
+        if (resolvedChips.isNotEmpty()) {
+            Chips(resolvedChips)
         }
-        User(name = username)
+        Assignee(name = resolvedAssignee)
     }
 }
 
+// 제목 UI
 @Composable
 fun Title(title: String?) {
     val displayTitle = title?.takeIf { it.isNotBlank() } ?: "제목 없음"
@@ -73,11 +81,11 @@ fun Title(title: String?) {
     )
 }
 
+// 설명 UI
 @Composable
-fun Content(content: String?) {
-    val displayContent = content?.takeIf { it.isNotBlank() } ?: ""
+fun Description(description: String) {
     Text(
-        text = displayContent,
+        text = description,
         fontSize = 14.sp,
         fontWeight = FontWeight.Normal,
         color = Gray600,
@@ -112,7 +120,7 @@ fun Chips(chips: List<String>) {
 
 
 @Composable
-fun User(name: String) {
+fun Assignee(name: String) {
 
     HorizontalDivider(color = Gray200, thickness = 1.dp)
     Row(
@@ -156,30 +164,30 @@ fun CardPreview() {
     ) {
         Card(
             title = "LazyColumn 컴포넌트 구현",
-            content = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
+            description = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
             chips = listOf("컴포넌트", "성능"),
-            username = "다이노",
+            assignee = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
             chips = listOf("컴포넌트", "성능"),
-            username = "다이노",
+            assignee = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
-            content = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
-            username = "다이노",
+            description = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
+            assignee = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
-            username = "다이노",
+            assignee = "다이노",
         )
 
         Card(
             title = "너무너무 긴 제목은 한 줄까지만 노출하고 말줄임표로 처리합니다.",
-            content = "너무너무너무 긴 설명은 두 줄까지만 노출하고 말줄임표로 처리합니다 두 줄까지만 노출하고 말줄임표로 처리합니다",
+            description = "너무너무너무 긴 설명은 두 줄까지만 노출하고 말줄임표로 처리합니다 두 줄까지만 노출하고 말줄임표로 처리합니다",
             chips = listOf("너무너무", "긴 태그", "최대로", "5자까지", "5개제한임"),
-            username = "너무너무너무 긴 담당자도 한 줄 너무너무너무 긴 담당자도 한 줄",
+            assignee = "너무너무너무 긴 담당자도 한 줄 너무너무너무 긴 담당자도 한 줄",
         )
     }
 }
@@ -189,17 +197,13 @@ fun CardPreview() {
 internal fun resolveCardTitle(title: String?): String {
     val normalizedTitle = title?.trim()
 
-    return when {
-        normalizedTitle.isNullOrEmpty() -> DEFAULT_TITLE
-        normalizedTitle.length > MAX_TITLE_LENGTH -> normalizedTitle.take(MAX_TITLE_LENGTH)
-        else -> normalizedTitle
-    }
+    return if (normalizedTitle.isNullOrEmpty()) DEFAULT_TITLE else normalizedTitle
 }
 
-// 내용
-internal fun resolveCardContent(content: String?): String? {
-    val normalizedContent = content?.trim()
-    return normalizedContent?.takeIf { it.isNotEmpty() }
+// 설명
+internal fun resolveCardDescription(description: String?): String? {
+    val normalizedDescription = description?.trim()
+    return normalizedDescription?.takeIf { it.isNotEmpty() }
 }
 
 // 칩(1개)
@@ -214,12 +218,8 @@ internal fun resolveCardChip(chip: String?): String? {
 internal fun resolveVisibleChips(chips: List<String?>): List<String> =
     chips.mapNotNull(::resolveCardChip).take(5)
 
-// 사용자이름
-internal fun resolveCardUser(user:String?): String {
-    val normalizedUser = user?.trim()
-    return when{
-        normalizedUser.isNullOrEmpty()-> DEFAULT_USERNAME
-        normalizedUser.length > MAX_USERNAME_LENGTH -> normalizedUser.take(MAX_USERNAME_LENGTH)
-        else -> normalizedUser
-    }
+// 담당자
+internal fun resolveCardAssignee(assignee: String?): String {
+    val normalizedAssignee = assignee?.trim()
+    return if (normalizedAssignee.isNullOrEmpty()) DEFAULT_ASSIGNEE else normalizedAssignee
 }
