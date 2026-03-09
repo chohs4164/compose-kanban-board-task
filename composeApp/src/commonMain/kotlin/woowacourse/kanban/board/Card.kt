@@ -36,10 +36,13 @@ import woowacourse.kanban.board.Theme.Gray700
 import woowacourse.kanban.board.Theme.Gray900
 
 
-private const val DEFAULT_TITLE= "제목없음"
-private const val MAX_TITLE_LENGTH = 20 // 말줄임표로 표시되는 기준을 글자수 20으로 정의하겠습니다.
+private const val DEFAULT_TITLE = "제목없음"
+private const val DEFAULT_USERNAME = "사용자이름없음"
+
+val MAX_TITLE_LENGTH = 20 // 말줄임표로 표시되는 기준을 글자수 20자로 정의하겠습니다.
+val MAX_USERNAME_LENGTH = 17 // 말줄임표로 표시되는 기준을 글자수 17자로 정의하겠습니다.
 @Composable
-fun Card(title: String = "제목없음", content: String = "", chips: List<String> = emptyList(), user: String = "알수없음") {
+fun Card(title: String = "제목없음", content: String = "", chips: List<String> = emptyList(), username: String = "알수없음") {
     Column(
         modifier = Modifier
             .width(286.dp)
@@ -53,7 +56,7 @@ fun Card(title: String = "제목없음", content: String = "", chips: List<Strin
         if (chips.isNotEmpty()) {
             Chips(chips)
         }
-        User(name = user)
+        User(name = username)
     }
 }
 
@@ -155,28 +158,28 @@ fun CardPreview() {
             title = "LazyColumn 컴포넌트 구현",
             content = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
             chips = listOf("컴포넌트", "성능"),
-            user = "다이노",
+            username = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
             chips = listOf("컴포넌트", "성능"),
-            user = "다이노",
+            username = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
             content = "세로 스크롤 가능한 리스트 컴포넌트를 만들고 성능 최적화를 적용합니다.",
-            user = "다이노",
+            username = "다이노",
         )
         Card(
             title = "LazyColumn 컴포넌트 구현",
-            user = "다이노",
+            username = "다이노",
         )
 
         Card(
             title = "너무너무 긴 제목은 한 줄까지만 노출하고 말줄임표로 처리합니다.",
             content = "너무너무너무 긴 설명은 두 줄까지만 노출하고 말줄임표로 처리합니다 두 줄까지만 노출하고 말줄임표로 처리합니다",
             chips = listOf("너무너무", "긴 태그", "최대로", "5자까지", "5개제한임"),
-            user = "너무너무너무 긴 담당자도 한 줄 너무너무너무 긴 담당자도 한 줄",
+            username = "너무너무너무 긴 담당자도 한 줄 너무너무너무 긴 담당자도 한 줄",
         )
     }
 }
@@ -194,13 +197,29 @@ internal fun resolveCardTitle(title: String?): String {
 }
 
 // 내용
-internal fun resolveCardContent(content: String?): String {
-    val
+internal fun resolveCardContent(content: String?): String? {
+    val normalizedContent = content?.trim()
+    return normalizedContent?.takeIf { it.isNotEmpty() }
 }
+
 // 칩(1개)
+internal fun resolveCardChip(chip: String?): String? {
+    val normalizedChip = chip?.trim()
+    return normalizedChip
+        ?.takeIf { it.isNotEmpty() }
+        ?.take(5)
+}
 
-internal fun resolveCardChip(chip: String?): String =
-    chip.takeIf { it.isNotBlank() } ?: ""
+// 칩(여러개 - 5개로 갯수 제한)
+internal fun resolveVisibleChips(chips: List<String?>): List<String> =
+    chips.mapNotNull(::resolveCardChip).take(5)
 
-internal fun
-// 사용자
+// 사용자이름
+internal fun resolveCardUser(user:String?): String {
+    val normalizedUser = user?.trim()
+    return when{
+        normalizedUser.isNullOrEmpty()-> DEFAULT_USERNAME
+        normalizedUser.length > MAX_USERNAME_LENGTH -> normalizedUser.take(MAX_USERNAME_LENGTH)
+        else -> normalizedUser
+    }
+}
