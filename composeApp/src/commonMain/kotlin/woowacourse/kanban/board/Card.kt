@@ -36,6 +36,8 @@ import woowacourse.kanban.board.Theme.Gray700
 import woowacourse.kanban.board.Theme.Gray900
 
 
+private const val DEFAULT_TITLE= "제목없음"
+private const val MAX_TITLE_LENGTH = 20 // 말줄임표로 표시되는 기준을 글자수 20으로 정의하겠습니다.
 @Composable
 fun Card(title: String = "제목없음", content: String = "", chips: List<String> = emptyList(), user: String = "알수없음") {
     Column(
@@ -178,3 +180,27 @@ fun CardPreview() {
         )
     }
 }
+
+// 단위 테스트용
+// 제목
+internal fun resolveCardTitle(title: String?): String {
+    val normalizedTitle = title?.trim()
+
+    return when {
+        normalizedTitle.isNullOrEmpty() -> DEFAULT_TITLE
+        normalizedTitle.length > MAX_TITLE_LENGTH -> normalizedTitle.take(MAX_TITLE_LENGTH)
+        else -> normalizedTitle
+    }
+}
+
+// 내용
+internal fun resolveCardContent(content: String?): String {
+    val
+}
+// 칩(1개)
+
+internal fun resolveCardChip(chip: String?): String =
+    chip.takeIf { it.isNotBlank() } ?: ""
+
+internal fun
+// 사용자
